@@ -5,8 +5,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:todolist_firebase/main.dart';
 import 'package:todolist_firebase/screens/home_page.dart';
-import 'package:wc_form_validators/wc_form_validators.dart';
-
 import '../../utils/styles.dart';
 import '../../widgets/text_form.dart';
 import 'login.dart';
@@ -23,6 +21,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  
 
   @override
   Widget build(BuildContext context) {

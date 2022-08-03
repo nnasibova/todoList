@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wc_form_validators/wc_form_validators.dart';
 import '../constants/constants.dart';
 import '../utils/styles.dart';
 

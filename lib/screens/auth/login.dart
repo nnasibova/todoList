@@ -3,14 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:todolist_firebase/screens/auth/register.dart';
-import 'package:wc_form_validators/wc_form_validators.dart';
 import '../../main.dart';
+import '../../provider/provider.dart';
 import '../../utils/styles.dart';
 import '../../widgets/text_form.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -18,9 +19,35 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    if (Provider.of<ProviderProfile>(context, listen: false).isLoggedIn==true) {
+      getCurrentUser();
+      super.initState();
+    }
+  }
+
+  void getCurrentUser() {
+    setState(() {
+
+if(FirebaseAuth.instance.currentUser?.uid !=null) {
+         Provider.of<ProviderProfile>(context, listen: false).userId =
+          FirebaseAuth.instance.currentUser!.uid;
+    }
+      // Provider.of<ProviderProfile>(context, listen: false).userId =
+      //     FirebaseAuth.instance.currentUser!.uid;
+      //     print(FirebaseAuth.instance.currentUser!.uid);
+
+    });
+
+    
+
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,16 +80,15 @@ class _LoginScreenState extends State<LoginScreen> {
               text: "Email",
               controller: emailController,
               icon: FontAwesomeIcons.user,
-             
             ),
             const SizedBox(
               height: 20,
             ),
             TextFieldContainer(
-                text: "Password",
-                controller: passwordController,
-                icon: FontAwesomeIcons.key,
-              ),
+              text: "Password",
+              controller: passwordController,
+              icon: FontAwesomeIcons.key,
+            ),
             const SizedBox(
               height: 40,
             ),
@@ -108,6 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future signIn() async {
+    Provider.of<ProviderProfile>(context, listen: false).isLogged();
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -119,12 +146,12 @@ class _LoginScreenState extends State<LoginScreen> {
           email: emailController.text.trim(),
           password: passwordController.text.trim());
     } on FirebaseAuthException catch (e) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
           backgroundColor: Colors.red,
           content: Text(e.toString()),
         ),
-      );      
+      );
     }
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }

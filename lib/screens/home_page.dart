@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todolist_firebase/utils/styles.dart';
 import 'package:todolist_firebase/widgets/drawer.dart';
+
+import '../provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -14,17 +17,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   CollectionReference? collection;
-  List todos = [];
   String input = "";
 
-  
-  createTodos(String uid) {
+  createTodos() {
     DocumentReference documentReference =
         FirebaseFirestore.instance.collection("MyTodos").doc(input);
 
-    Map<String, String> todoList = {"todoTitle": input, uid: uid};
-
-    documentReference.set(todoList).whenComplete(() => {print("created")});
+    Map<String, String> todoList = {
+      "todoTitle": input,
+      "userId": Provider.of<ProviderProfile>(context, listen: false).checkUser()
+    };
+    documentReference.set(todoList).whenComplete(() =>
+        {print(Provider.of<ProviderProfile>(context, listen: false).userId)});
   }
 
   deleteTodos(item) {
@@ -62,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       GestureDetector(
                           onTap: () {
                             setState(() {
-                              createTodos(user.uid);
+                              createTodos();
                               Navigator.pop(context);
                             });
                           },
@@ -94,6 +98,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     bottomRight: Radius.circular(100),
                     bottomLeft: Radius.circular(100),
                   )),
+            ),
+            Text(
+              Provider.of<ProviderProfile>(context, listen: false).userId,
+              style: TextStyle(color: Colors.black, fontSize: 25),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -135,8 +143,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             StreamBuilder<QuerySnapshot>(
-              stream:
-                  FirebaseFirestore.instance.collection("MyTodos").snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection("MyTodos")
+                  .where("userId",
+                      isEqualTo:
+                          Provider.of<ProviderProfile>(context, listen: false)
+                              .checkUser())
+                  .snapshots(),
               builder: (context, AsyncSnapshot snapshots) {
                 if (snapshots.data == null) {
                   return const Center(
